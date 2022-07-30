@@ -245,10 +245,7 @@ int insert_client_entry(client_entries *clients, char *name, int p_id, int t_id)
 }
 void process(int id)
 {
-    // printf("%d created\n",id);
-    // sleep(1);
-    // printf("%d exiting\n",id);
-    // exit(0);
+    
     p_id = id;
     rem_clients = CPP;
     UNIX_socketpair_list_threads = create_socket_pool(T);
@@ -259,8 +256,7 @@ void process(int id)
         pthread_t thread_id;
         int t_id=i;
         int ret = pthread_create(&thread_id, NULL, thread, (void*)t_id);
-        // usleep(100);
-        // usleep(10);
+        
         if (ret != 0)
         {
             perror("thread_create");
@@ -277,14 +273,7 @@ void process(int id)
         }
     }
 }
-// int find_thread_by_cliname(char* name,char** client_names){
-//     for(int i=0;i<T;i++){
-//         if(strcmp(name,client_names[i])==0){
-//             return i;
-//         }
-//     }
-//     return -1; //no client with given name
-// }
+
 
 int **create_socket_pool(int num)
 {
@@ -365,7 +354,7 @@ void *thread(void *tid)
 }
 void handle_client(int connfd, int t_id, int sockfd)
 {
-    // printf("\np_id: %d, t_id: %d inside handle client", p_id, t_id);
+    
     fd_set rset, tempset;
     FD_ZERO(&rset);
     FD_ZERO(&tempset);
@@ -396,11 +385,11 @@ void handle_client(int connfd, int t_id, int sockfd)
                // printf("%d bytes recv",dgram_size);
                 if (dgram_size > 0)
                 {
-                    //printf("\n%d:dest_pid,%d:dest_tid,%d:src_name,%s:msg---- connfd",recvbuf->dest_pid,recvbuf->dest_tid,recvbuf->src_name,recvbuf->msg);
+                    
                     if (recvbuf->dest_tid == t_id && recvbuf->dest_pid == p_id && (strcmp(recvbuf->dest_name, name) == 0))
                     {
                         char *msg = (char *)&(recvbuf->msg);
-                       // printf("\n%s __________%s____\n",msg,recvbuf->src_name);
+                       
                         write(connfd, recvbuf->src_name, strlen(recvbuf->src_name));
                         write(connfd, ": ", 2);
                         write(connfd, (void *)msg, strlen(msg) + 1);
@@ -540,8 +529,7 @@ int read_connfd(int connfd,char**name,char**dest_name,char**msg,int*msg_type){
             free(buf);
             return -5;
         }
-       // printf("%s",*msg);
-        //printf("%s",*dest_name);
+       
         return 1;
     }
 }
@@ -554,7 +542,7 @@ void send_dgram(char *src_name, char *dest_name, char *msg, int dest_pid, int de
     sendbuf->dest_tid = dest_tid;
     sendbuf->msglen = strlen(msg) + 1; //+1 for null character
     strcpy(sendbuf->msg, msg);
-   // printf("%d:dest_pid,%d:dest_tid,%s:src_name,%s:msg --------in send dgram",sendbuf->dest_pid,sendbuf->dest_tid,sendbuf->src_name,sendbuf->msg);
+   
 
     //gain exclusive access to semaphore
     struct sembuf operation[2];
@@ -600,26 +588,7 @@ int main(int argc,char* argv[])
     accept_lock_init();
     setbuf(stdout, NULL);
 
-    // process(1);
-
-    // char* sendbuf=malloc(4096);
-    // dgram*recvbuf=malloc(4096);
-    // int sockets[2];
-    // socketpair(AF_UNIX,SOCK_STREAM,0,sockets);
-    // char* content=malloc(200);
-    // strcpy(content,"CHAT vikas hello there");
-    // // close(sockets[0]);
-    // write(sockets[0],content,strlen(content)+1);
-    // strcpy(sendbuf,"helllo from the other side");
-    // send_dgram(name,name,sendbuf,10,10);
-    // int retrecv=recv(sockets[0],recvbuf,4096,0);
-    // char* msg=(char*)&(recvbuf->msg);
-    // int connfd=sockets[1];
-    // char *name = malloc(MAX_NAME_SIZE);
-    // char *dest_name = malloc(MAX_NAME_SIZE);
-    // char *msg = malloc(MAX_MSG_SIZE);
-    // int msg_type;
-    // int ret=read_connfd(connfd,&name,&dest_name,&msg,&msg_type);
+    
 
     shmid = shmget(IPC_PRIVATE, N * T * sizeof(client_entries), IPC_CREAT | 0666);
     clients = (client_entries *)shmat(shmid, NULL, 0);
@@ -632,19 +601,7 @@ int main(int argc,char* argv[])
     {
         semctl(semid_sockpool, i, SETVAL, 0);
     }
-    // int pid,tid;
-    // int i1=insert_client_entry(clients,"hello",1,1);
-    // int i2=insert_client_entry(clients,"hellOOO",2,1);
-    // int ret1=check_client_entry(clients,"hello",&tid,&pid);
-    // clear_client_entry(clients,"hello");
-    // int ret2=check_client_entry(clients,"hellos",&tid,&pid);
-    // int i3=insert_client_entry(clients,"hello",1,1);
-    // int i4=insert_client_entry(clients,"hello",1,1);
 
-    
-    // raise(SIGCHLD);
-    
-    // raise(SIGUSR1);
     UNIX_socketpair_list_process = create_socket_pool(N);
     create_process_pool(&pool);
     signal(SIGCHLD, sigchld_handler);

@@ -21,12 +21,16 @@
 
 //define the server port number
 #define SERVPORT 60000
-int main(){
+int main(int argc,char* argv[]){
+    if(argc!=3){
+        printf("Usage ./chat_client MPTS_SERVER_IP MPTS_SERV_PORT");
+        exit(0);
+    }
     struct sockaddr_in servaddr;
     servaddr.sin_family=AF_INET;
-    servaddr.sin_port=htons(60000);
+    servaddr.sin_port=htons(atoi(argv[2]));
     //for testing put the correct IP address in the below statement
-    servaddr.sin_addr.s_addr=inet_addr("127.0.0.1");
+    servaddr.sin_addr.s_addr=inet_addr(argv[1]);
 
     int sockfd=socket(AF_INET,SOCK_STREAM,0);
     int ret=connect(sockfd,(struct sockaddr*)&servaddr,sizeof(servaddr));
@@ -40,6 +44,8 @@ int main(){
     FD_SET(sockfd,&rset);
     int nfds=sockfd+1;
     fcntl(STDIN_FILENO,F_SETFL,O_NONBLOCK);
+    printf("Welcome to MPTS Chat Client.\nIssue a JOIN <username> command to register yourself with the server.\nAfter registering, you can send a message to <user> by using CHAT <user> <message> syntax\nTo exit the client use LEAV command\n >>>");
+    printf("\n>>>");
     while(1){
         memset(stdinbuf,'\0',1000);
         memset(readbuf,'\0',1000);
@@ -49,8 +55,15 @@ int main(){
                 int bytes_read=read(STDIN_FILENO,stdinbuf,999);
                 if(bytes_read>1){
                     stdinbuf[bytes_read-1]='\0';
+    
                     write(sockfd,stdinbuf,strlen(stdinbuf)+1);
+                    if(strcmp(stdinbuf,"LEAV")==0){
+                        sleep(5);
+                        exit(0);
+                    }
+                    printf("\n>>>");
                 }
+
             }
             if(FD_ISSET(sockfd,&rset)==1){
                 int bytes_read=read(sockfd,readbuf,999);
